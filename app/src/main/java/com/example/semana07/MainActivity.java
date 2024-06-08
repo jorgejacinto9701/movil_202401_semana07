@@ -1,24 +1,89 @@
 package com.example.semana07;
 
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ListView;
 
-import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
-public class MainActivity extends AppCompatActivity {
+import com.example.semana07.adapter.LibroAdapter;
+import com.example.semana07.entity.Libro;
+import com.example.semana07.service.ServiceLibro;
+import com.example.semana07.util.ConnectionRest;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+public class MainActivity  extends AppCompatActivity {
+
+    EditText txtTitulo;
+    Button btnConsultar;
+
+    ListView lstConsultaLibro;
+    ArrayList<Libro> data = new ArrayList<Libro>();
+    LibroAdapter adaptador;
+
+    ServiceLibro servicio;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
+
+
+        txtTitulo = findViewById(R.id.txtRegTitulo);
+
+        lstConsultaLibro = findViewById(R.id.lstConsultaLibros);
+        adaptador = new LibroAdapter(this, R.layout.activity_libro_item_crud, data);
+        lstConsultaLibro.setAdapter(adaptador);
+
+        servicio = ConnectionRest.getConnection().create(ServiceLibro.class);
+
+        btnConsultar = findViewById(R.id.btnLista);
+        btnConsultar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String filtro = txtTitulo.getText().toString();
+                consulta(filtro);
+            }
         });
+    }
+
+
+    public  void consulta(String filtro){
+
+        Call<List<Libro>> call = servicio.listaPorTitulo(filtro);
+        call.enqueue(new Callback<List<Libro>>() {
+            @Override
+            public void onResponse(Call<List<Libro>> call, Response<List<Libro>> response) {
+
+                if(response.isSuccessful()){
+                    List<Libro> lstSalida = response.body();
+                    data.clear();
+                    data.addAll(lstSalida);
+                    adaptador.notifyDataSetChanged();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Libro>> call, Throwable t) {
+
+                mensajeAlert("ERROR -> Error en la respuesta" + t.getMessage());
+            }
+        });
+    }
+
+    public  void mensajeAlert(String msg){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setMessage(msg);
+        alertDialog.setCancelable(true);
+        alertDialog.show();
     }
 }
