@@ -15,6 +15,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.semana07.entity.Libro;
 import com.example.semana07.service.ServiceLibro;
 
 import java.util.ArrayList;
@@ -43,6 +44,9 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
     TextView idTitlePage;
 
     String metodo;
+
+    Libro objActual;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,7 +75,14 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
         }else if (metodo.equals("ACTUALIZAR")){
             idTitlePage.setText("Actualiza Libro");
             btnEnviar.setText("Actualizar");
+
+            objActual = (Libro) getIntent().getExtras().get("var_objeto");
+            txtTitulo.setText(objActual.getTitulo());
+            txtAnio.setText(String.valueOf(objActual.getAnio()));
+            txtSerie.setText(objActual.getSerie());
+
         }
+
 
 
         btnRegresar.setOnClickListener(new View.OnClickListener() {
