@@ -1,7 +1,9 @@
 package com.example.semana07;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -23,7 +25,7 @@ import retrofit2.Response;
 public class MainActivity  extends AppCompatActivity {
 
     EditText txtTitulo;
-    Button btnConsultar;
+    Button btnConsultar , btnRegistrar;
 
     ListView lstConsultaLibro;
     ArrayList<Libro> data = new ArrayList<Libro>();
@@ -47,6 +49,8 @@ public class MainActivity  extends AppCompatActivity {
         servicio = ConnectionRest.getConnection().create(ServiceLibro.class);
 
         btnConsultar = findViewById(R.id.btnLista);
+        btnRegistrar = findViewById(R.id.btnRegistrar);
+
         btnConsultar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,6 +58,32 @@ public class MainActivity  extends AppCompatActivity {
                 consulta(filtro);
             }
         });
+
+        btnRegistrar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               //mensajeAlert("Registrar");
+               Intent intent = new Intent(MainActivity.this, LibroFormularioCrudActivity.class);
+               intent.putExtra("var_metodo", "REGISTRAR");
+               startActivity(intent);
+            }
+        });
+
+        lstConsultaLibro.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //mensajeAlert("Actualiza >> " + position);
+
+                Libro obj =  data.get(position);
+
+                Intent intent = new Intent(MainActivity.this, LibroFormularioCrudActivity.class);
+                intent.putExtra("var_metodo", "ACTUALIZAR");
+                intent.putExtra("var_objeto", obj);
+                startActivity(intent);
+            }
+        });
+
+
     }
 
 
