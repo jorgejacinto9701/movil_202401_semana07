@@ -6,10 +6,13 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -29,6 +32,8 @@ import java.util.List;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+
+import com.example.semana07.util.FunctionUtil;
 
 public class LibroFormularioCrudActivity extends AppCompatActivity {
 
@@ -57,6 +62,7 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
 
     Libro objActual;
 
+    RadioButton rbtActivo, rbtInactivo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +75,8 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
             return insets;
         });
 
+        rbtActivo = findViewById(R.id.rbtActivo);
+        rbtInactivo = findViewById(R.id.rbtInactivo);
 
         servicePais = ConnectionRest.getConnection().create(ServicePais.class);
         serviceCategoria = ConnectionRest.getConnection().create(ServiceCategoria.class);
@@ -103,7 +111,12 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
             txtTitulo.setText(objActual.getTitulo());
             txtAnio.setText(String.valueOf(objActual.getAnio()));
             txtSerie.setText(objActual.getSerie());
-
+            
+            if (objActual.getEstado() == 1){
+                rbtActivo.setChecked(true);
+            }else{
+                rbtInactivo.setChecked(true);
+            }
         }
 
 
@@ -113,6 +126,40 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
             public void onClick(View v) {
                     Intent intent = new Intent(LibroFormularioCrudActivity.this, MainActivity.class);
                     startActivity(intent);
+            }
+        });
+
+        btnEnviar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String titulo = txtTitulo.getText().toString();
+                String anio = txtAnio.getText().toString();
+                String serie= txtSerie.getText().toString();
+                String idPais = spnPais.getSelectedItem().toString().split(":")[0];
+                String idCategoria = spnCategoria.getSelectedItem().toString().split(":")[0];
+
+                Pais objPais = new Pais();
+                objPais.setIdPais(Integer.parseInt(idPais.trim()));
+
+                Categoria objCategoria = new Categoria();
+                objCategoria.setIdCategoria(Integer.parseInt(idCategoria.trim()));
+
+                Libro objLibro = new Libro();
+                objLibro.setTitulo(titulo);
+                objLibro.setAnio(Integer.parseInt(anio));
+                objLibro.setSerie(serie);
+                objLibro.setPais(objPais);
+                objLibro.setCategoria(objCategoria);
+                objLibro.setFechaRegistro(FunctionUtil.getFechaActualStringDateTime());
+                if (metodo.equals("REGISTRAR")){
+                    objLibro.setEstado(1);
+                    registra(objLibro);
+                }else{
+                    objLibro.setEstado(rbtActivo.isChecked() ? 1 : 0);
+                    objLibro.setIdLibro(objActual.getIdLibro());
+                    actualiza(objLibro);
+                }
+
             }
         });
 
@@ -179,6 +226,54 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
         });
     }
 
+    void registra(Libro obj){
+        Call<Libro> call = serviceLibro.registraLibro(obj);
+        call.enqueue(new Callback<Libro>() {
+            @Override
+            public void onResponse(Call<Libro> call, Response<Libro> response) {
+                if (response.isSuccessful()){
+                    Libro objSalida = response.body();
+                    mensajeAlert(" Registro de Libro exitoso:  "
+                            + " \n >>>> ID >> " + objSalida.getIdLibro()
+                            + " \n >>> Título >>> " +  objSalida.getTitulo());
+                }
+            }
+            @Override
+            public void onFailure(Call<Libro> call, Throwable t) {
 
+            }
+        });
+    }
+
+    void actualiza(Libro obj){
+        Call<Libro> call = serviceLibro.actualizaLibro(obj);
+        call.enqueue(new Callback<Libro>() {
+            @Override
+            public void onResponse(Call<Libro> call, Response<Libro> response) {
+                if (response.isSuccessful()){
+                    Libro objSalida = response.body();
+                    mensajeAlert(" Actualización de de Libro exitosa:  "
+                            + " \n >>>> ID >> " + objSalida.getIdLibro()
+                            + " \n >>> Título >>> " +  objSalida.getTitulo());
+                }
+            }
+            @Override
+            public void onFailure(Call<Libro> call, Throwable t) {
+
+            }
+        });
+    }
+
+
+    void mensajeToast(String mensaje){
+        Toast toast1 =  Toast.makeText(getApplicationContext(),mensaje, Toast.LENGTH_LONG);
+        toast1.show();
+    }
+    public void mensajeAlert(String msg){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+        alertDialog.setMessage(msg);
+        alertDialog.setCancelable(true);
+        alertDialog.show();
+    }
 
 }
