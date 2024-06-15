@@ -131,6 +131,17 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
                         paises.add(aux.getIdPais() + " : "  + aux.getNombre());
                     }
                     adaptadorPais.notifyDataSetChanged();
+                    if (metodo.equals("ACTUALIZAR")){
+                        String id = String.valueOf(objActual.getPais().getIdPais());
+                        String nombre = String.valueOf(objActual.getPais().getNombre());
+                        String row = id + " : " + nombre;
+                        for(int i = 0; i <= paises.size(); i++ ){
+                            if (paises.get(i).equals(row)){
+                                spnPais.setSelection(i);
+                                break;
+                            }
+                        }
+                    }
             }
             @Override
             public void onFailure(Call<List<Pais>> call, Throwable t) {
@@ -149,6 +160,17 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
                     categorias.add(aux.getIdCategoria() + " : "  + aux.getDescripcion());
                 }
                 adaptadorCategoria.notifyDataSetChanged();
+                if (metodo.equals("ACTUALIZAR")){
+                     String id = String.valueOf(objActual.getCategoria().getIdCategoria());
+                     String nombre = String.valueOf(objActual.getCategoria().getDescripcion());
+                     String row = id + " : " + nombre;
+                     for(int i = 0; i <= categorias.size(); i++ ){
+                         if (categorias.get(i).equals(row)){
+                             spnCategoria.setSelection(i);
+                             break;
+                         }
+                     }
+                }
             }
             @Override
             public void onFailure(Call<List<Categoria>> call, Throwable t) {
