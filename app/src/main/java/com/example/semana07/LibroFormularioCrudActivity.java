@@ -63,6 +63,8 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
     Libro objActual;
 
     RadioButton rbtActivo, rbtInactivo;
+    TextView txtEstado;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,7 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
 
         rbtActivo = findViewById(R.id.rbtActivo);
         rbtInactivo = findViewById(R.id.rbtInactivo);
+        txtEstado = findViewById(R.id.txtEstado);
 
         servicePais = ConnectionRest.getConnection().create(ServicePais.class);
         serviceCategoria = ConnectionRest.getConnection().create(ServiceCategoria.class);
@@ -103,6 +106,9 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
         if (metodo.equals("REGISTRAR")){
             idTitlePage.setText("Registra Libro");
             btnEnviar.setText("Registrar");
+            rbtActivo.setVisibility(View.GONE);
+            rbtInactivo.setVisibility(View.GONE);
+            txtEstado.setVisibility(View.GONE);
         }else if (metodo.equals("ACTUALIZAR")){
             idTitlePage.setText("Actualiza Libro");
             btnEnviar.setText("Actualizar");
@@ -111,7 +117,7 @@ public class LibroFormularioCrudActivity extends AppCompatActivity {
             txtTitulo.setText(objActual.getTitulo());
             txtAnio.setText(String.valueOf(objActual.getAnio()));
             txtSerie.setText(objActual.getSerie());
-            
+
             if (objActual.getEstado() == 1){
                 rbtActivo.setChecked(true);
             }else{
